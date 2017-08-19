@@ -4,28 +4,40 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.BoxLayout;
+import javax.swing.Timer;
+
 import java.awt.GridLayout;
+
 import javax.swing.JList;
+
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import de.mink_ing.swingComponents.JIndustrialButton;
 import de.mink_ing.swingComponents.JLed;
 
 import javax.swing.JLabel;
+
 import de.mink_ing.swingComponents.OnOffPanel;
 import de.mink_ing.swingComponents.dscope.SimpleScope;
+import de.mink_ing.swingComponents.dscope.SimpleXYScope;
 import de.mink_ing.swingComponents.JPoti;
 
-public class SwingComponentsTest {
+public class SwingComponentsTest implements ActionListener {
 
 	private JFrame frame;
 	private final JButton btnTes = new JButton("Tes1");
+	private SimpleXYScope scope2;
+	private int phase = 0;
 
 	/**
 	 * Launch the application.
@@ -178,5 +190,28 @@ public class SwingComponentsTest {
 			scope1.addData(0.5*Math.cos(2*Math.PI * 5 * i/1000));
 		}
 		panel_2.add(scope1);
+		
+		scope2 = new SimpleXYScope(100);
+		scope2.setPreferredSize(new Dimension(300, 300));
+		for(int i=0; i<1000; i++){
+			phase++;
+			scope2.addData(0.5*Math.cos(2*Math.PI * 5 * phase/1000)+0.1*Math.random(), 0.5*Math.sin(2*Math.PI * 5 * phase/1000)+0.1*Math.random());
+		}
+		panel_2.add(scope2);
+		
+		Timer timer = new Timer(10, this);
+		timer.setInitialDelay(1000);
+		timer.start();
+		
+		
+	}
+
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		phase++;
+		scope2.addData(0.6*Math.cos(2*Math.PI * 5 * phase/1000)+0.1*Math.random(), 0.3*Math.sin(2*Math.PI * 5 * phase/1000)+0.1*Math.random());
+		scope2.repaint();
 	}
 }
