@@ -50,7 +50,7 @@ public class MultiChannelScope extends JPanel {
 
 	
 	private void initStyles() {
-		Color colortbl[] = {Color.BLACK, Color.BLUE, Color.RED, Color.GREEN};
+		Color colortbl[] = {Color.BLACK, Color.BLUE, Color.RED, Color.GREEN, Color.CYAN, Color.MAGENTA, Color.ORANGE, Color.PINK};
 		
 		for(int is = 0; is<lineStyles.length; is++) {
 			lineStyles[is] = new LineStyle();
@@ -276,7 +276,12 @@ public class MultiChannelScope extends JPanel {
 
 		public void addData(double[] data){
 			for(int ich = 0; ich < noOfChannels; ich++){
-				databuffer[ich][datapointer] = data[ich];
+				if(ich < data.length) {
+					databuffer[ich][datapointer] = data[ich];
+				}
+				else {
+					databuffer[ich][datapointer] = java.lang.Double.NaN;
+				}
 			}
 			datapointer++;
 			if(datapointer>=this.datalen) datapointer = 0;
