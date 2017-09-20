@@ -21,10 +21,16 @@ import org.influxdb.dto.Point;
 
 public class StreamToInfluxDB {
 
-	private static int port = 2134;
 	private static String host = "localhost";
+	private static int port = 2134;
+	
+	private static String databaseURL = "http://localhost:8086";
+	private static String databaseName = "mydb";
+	private static String databasePointName = "csvData";
+	
 	private static boolean readTableHeaders = true;
 	private static boolean readScalings = false;
+	
 	//private static boolean readUnit = false;
 
 	private static Socket mySocket;
@@ -76,7 +82,17 @@ public class StreamToInfluxDB {
 
 	public static void main(String args[]) throws Exception {
 		//System.out.println("hello, world.");
-
+		
+		try {
+			host = args[0];
+			port = Integer.parseInt(args[1]);
+			readTableHeaders = Boolean.parseBoolean(args[2]);
+			readScalings = Boolean.parseBoolean(args[3]);
+		}
+		catch (Exception e) {
+			System.out.println("wrong / missing arguments. Using default");
+		}
+		
 		boolean isConnected = false;
 		boolean firstLine = true;
 		boolean tableHeadersToRead = readTableHeaders;
@@ -202,8 +218,8 @@ public class StreamToInfluxDB {
 	private static void writeValuesToDB(String headlines[], double valueArray[]) {
 		InfluxDB influxDB = null;
 		//System.out.println("connect DB");
-		influxDB = InfluxDBFactory.connect("http://localhost:8086");
-		influxDB.setDatabase("mydb");
+		influxDB = InfluxDBFactory.connect(databaseURL);
+		influxDB.setDatabase(databaseName);
 
 		BatchPoints batchPoints = BatchPoints
 				.database("mydb")
@@ -222,7 +238,7 @@ public class StreamToInfluxDB {
 		//			batchPoints.point(thispoint);
 		//		}
 
-		Point.Builder thispointbuilder = Point.measurement("csvData");
+		Point.Builder thispointbuilder = Point.measurement(databasePointName);
 		for (int i = 0; i<headlines.length; i++) {
 			thispointbuilder.addField(headlines[i], valueArray[i]);
 		}
