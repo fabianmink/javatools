@@ -34,7 +34,7 @@ public class StreamSimulator {
 				SocketInStream = clientSocket.getInputStream();
 
 				//SocketOutStream.write(new String("Connected").getBytes());
-				SocketOutStream.write(new String("randomData0,randomData1,randomData2\r\n").getBytes());
+				SocketOutStream.write(new String("sineData,randomData1,randomData2\r\n").getBytes());
 			} catch (IOException e) {
 				System.out.println("Exception caught when trying to listen on port "
 						+ portNumber + " or listening for a connection");
@@ -47,14 +47,30 @@ public class StreamSimulator {
 //			buffer[1] = 51;
 //			buffer[2] = 13;
 //			buffer[3] = 10;
+			short angle = 0;
+			float freq = 0.001f;
+			
+			
 			while(true){
 				String outstring = "";
-				for (int i = 0; i< 3; i++) {
-					double rnd = (Math.random()-0.5)*65535;
-					outstring = outstring + String.format(Locale.ROOT, "%+06.0f", rnd);
-					if(i < 2) outstring = outstring + ",";
+				for(int i_lines=0;i_lines<20;i_lines++) {
+
+					angle +=  (short)(freq * 65536.0f);
+					float anglef = (float) (2.0f*Math.PI * angle/65536.0f);
+					float x = (float) (2.0f * Math.cos(anglef));
+
+
+					for (int i = 0; i< 3; i++) {
+						double rnd = (Math.random()-0.5);//*65535;
+						if(i == 1) {
+							rnd = 0.5*rnd + x;
+						}
+
+						outstring = outstring + String.format(Locale.ROOT, "%+06.2f", rnd);
+						if(i < 2) outstring = outstring + ",";
+					}
+					outstring = outstring + "\r\n";
 				}
-				outstring = outstring + "\r\n";
 				try {
 					//SocketOutStream.write(buffer,0,4);
 					SocketOutStream.write(outstring.getBytes());
@@ -62,7 +78,7 @@ public class StreamSimulator {
 				catch (IOException e) {
 					break;
 				}
-				Thread.sleep(1000);
+				Thread.sleep(20);
 				
 				
 				//int len = SocketInStream.read(buffer);

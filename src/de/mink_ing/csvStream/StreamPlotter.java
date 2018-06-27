@@ -9,12 +9,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.io.StreamTokenizer;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
@@ -30,16 +36,14 @@ import de.mink_ing.swingComponents.dscope.MultiChannelScope;
 
 public class StreamPlotter {
 
-	//private static final int WT_TCP_PORT = 5007;
-	//private static final String WT_IP_ADDRESS = "192.168.39.15";
-	//private static final int WT_TCP_PORT = 2134;
-	//private static final String WT_IP_ADDRESS = "localhost";
+	private static boolean readTableHeaders = true;
+	private static boolean readScalings = false;
 
 	private static ScopeWindow myWindow = null;
-	
+
 	private static Socket mySocket;
 	private static InputStream soIs;
-	private static OutputStream soOs;
+	//private static OutputStream soOs;
 
 	private static void connect() throws Exception {
 		mySocket = new Socket();
@@ -48,7 +52,7 @@ public class StreamPlotter {
 			InetSocketAddress wtAddress;
 			wtAddress = new InetSocketAddress(InetAddress.getByName(myWindow.getHost()), java.lang.Integer.parseInt(myWindow.getPort()) );
 			mySocket.connect(wtAddress, 1000); //Connect timeout: 1000ms
-			
+
 			//Enable/disable SO_TIMEOUT with the specified timeout, in milliseconds.
 			//With this option set to a non-zero timeout, a read() call on the 
 			//InputStream associated with this Socket will block for only this 
@@ -60,7 +64,7 @@ public class StreamPlotter {
 			mySocket.setSoTimeout(5000);
 
 			soIs = mySocket.getInputStream();
-			soOs = mySocket.getOutputStream();
+			//soOs = mySocket.getOutputStream();
 		} catch (IOException e) {
 			//e.printStackTrace();
 			disconnect();
@@ -71,7 +75,7 @@ public class StreamPlotter {
 
 	private static void disconnect() {
 		soIs = null;
-		soOs = null;
+		//soOs = null;
 
 		if(mySocket == null) return;
 
@@ -86,7 +90,7 @@ public class StreamPlotter {
 
 	public static void main(String args[]) throws Exception {
 		//System.out.println("hello, world.");
-		
+
 		//Run window creation synchronously on event dispatching thread (EDT)
 		EventQueue.invokeAndWait(new Runnable() {
 			public void run() {
@@ -101,24 +105,41 @@ public class StreamPlotter {
 		});
 
 		boolean isConnected = false;
-		boolean firstRun = true;
-		byte[] receivedBytes = new byte[100];
-		int noRead = 0;
-		double[] allVal = null;
-		String myString;
-		String myStringTok;
-		StringTokenizer mySt;
-		int nTok =0;
-		
+		boolean firstLine = true;
+		boolean tableHeadersToRead = readTableHeaders;
+		boolean scalingsToRead = readScalings;
+
+		StreamTokenizer st = null;
+
+		List<String> lineData = null;
+
+		String headlinesArray[] = null;
+		double valueArray[] = null;
+		double scalingsArray[] = null;
+
 		while(true){
 			if(myWindow.getCnctBtnPressed()) {
 				if(!isConnected) {
 					try {
+						System.out.println("Try connect.");
 						connect();
-						firstRun = true;
+						firstLine = true;
+						tableHeadersToRead = readTableHeaders;
+						scalingsToRead = readScalings;
+
+						lineData = new ArrayList<String>();
+
+						Reader r = new BufferedReader(new InputStreamReader(soIs));
+						st = new StreamTokenizer(r);
+						st.resetSyntax();
+						st.eolIsSignificant(true);
+						st.wordChars(' ', 'z');
+						st.whitespaceChars(',', ',');
 						isConnected = true;
+						System.out.println("connect ok.");
 					}
 					catch (Exception e) {
+						System.out.println("connect fail.");
 					}
 				}
 				else {
@@ -126,60 +147,92 @@ public class StreamPlotter {
 					isConnected = false;
 				}
 			}
-			
+
 			if(isConnected) {
 				try {
-					noRead = soIs.read(receivedBytes);
+					int token = st.nextToken();
 
+					switch (token) {
+					case StreamTokenizer.TT_EOF:
+						//System.out.println("End of File encountered.");
+						throw (new Exception("eof"));
+						//eof = true;
+						//break;
 
-					myString = new String(receivedBytes, 0, noRead);
-					mySt = new StringTokenizer(myString, ",");
-					//System.out.println("Read cnt: " + noRead + " String: " + myString);
+					case StreamTokenizer.TT_EOL:
+						//System.out.println("End of Line encountered.");
+						if(firstLine) {
+							firstLine = false;
 
-					if(firstRun) {
-						firstRun = false;
-						nTok = 0;
-						while(mySt.hasMoreTokens()) {
-							nTok++;
-							myStringTok = mySt.nextToken();
-							System.out.println("Tok: " + myStringTok);
+							//TODO: init with argument data, if requested
+							headlinesArray = new String[lineData.size()];
+							for(int i = 0; i < lineData.size(); i++) {
+								headlinesArray[i] = "val_" + i;
+							}
+
+							//TODO: init with argument data, if requested
+							scalingsArray = new double[lineData.size()];
+							for(int i = 0; i < lineData.size(); i++) {
+								scalingsArray[i] = 1.0;
+							}
+
+							valueArray = new double[lineData.size()];
+							for(int i = 0; i < lineData.size(); i++) {
+								valueArray[i] = Double.NaN;
+							}
+							
 						}
-						System.out.println("Sets: " + nTok);
-						allVal = new double[nTok];
-					}
-					else {
-						double offset = myWindow.getOffset();
-						double scale = myWindow.getScale();
-						String strAllVal = "";
-						for(int iTok=0;iTok<nTok;iTok++) {
-							myStringTok = mySt.nextToken();
-							double myVal = java.lang.Double.parseDouble(myStringTok);
-							allVal[iTok] = myVal * scale + offset;
-							strAllVal = strAllVal + String.format(Locale.ROOT, "%f, ", allVal[iTok]);
+
+						if(tableHeadersToRead) { 
+							for(int i = 0; i < lineData.size(); i++) {
+								headlinesArray[i] = lineData.get(i);
+							}
+							tableHeadersToRead = false;
+							
+							String hl_text = "- ";
+							for(int i = 0; i < lineData.size(); i++) {
+								hl_text += headlinesArray[i] + " - ";
+							}
+							myWindow.setAllValText(hl_text);
 						}
-						
-						//System.out.println("Werte: "+ allVal);
-						
-						//double[] dscopeTempAllData = new double[4];
-						//dscopeTempAllData[0] = allVal[0]*0.01;
-						//dscopeTempAllData[1] = allVal[1]*0.01;
-						//dscopeTempAllData[2] = allVal[2]*0.01;
-						//dscopeTempAllData[3] = allVal[3]*0.01;
-						
-						myWindow.setAllValText(strAllVal);
-						
-						//d-scopes
-						myWindow.addData(allVal);
+						else if (scalingsToRead){
+							for(int i = 0; i < lineData.size(); i++) {
+								scalingsArray[i] = Double.parseDouble(lineData.get(i));
+							}
+							scalingsToRead = false;
+						}
+						else {
+							for(int i = 0; i < lineData.size(); i++) {
+								valueArray[i] = scalingsArray[i] * Double.parseDouble(lineData.get(i));
+							}
+							myWindow.addData(valueArray);
+						}
+						lineData = new ArrayList<String>();
+
+						break;
+
+					case StreamTokenizer.TT_WORD:
+						lineData.add(st.sval);
+						//System.out.println("added: " + st.sval);
+						break;
+
+						//case StreamTokenizer.TT_NUMBER:
+						//   System.out.println("Number: " + st.nval);
+						//   break;
+
+					default:
+						//System.out.println((char) token + " encountered.");
 					}
 				}
 				catch (Exception e) {
+					e.printStackTrace();
 					disconnect();
 					isConnected = false;
 				}
 			} //if(isConnected)
-			
-			Thread.sleep(100);
-			
+
+			//Thread.sleep(100);
+
 			myWindow.setConnected(isConnected);
 
 			if(myWindow.isTerminated()) {
@@ -190,27 +243,27 @@ public class StreamPlotter {
 
 		System.exit(0);
 	} //public static void main
-	
+
 	static private class ScopeWindow extends JFrame implements WindowListener {
 
 		private static final long serialVersionUID = -4051264144624127380L;
-		
+
 		private JLabel label_host, label_port;
 		private JTextField text_host, text_port;
-		
+
 		private JLabel label_scale, label_offset;
 		private JTextField text_scale, text_offset;
-		
+
 		private JLabel label_all_val;
-		
+
 		private JButton cnctBtn;
-		
+
 		volatile private boolean terminate = false;
 		volatile private boolean isConnected = false;
 		volatile private boolean cnctBtnWasPressed = false;
 
 		private ScopePanelMinMax dscopePanel;
-		
+
 		public ScopeWindow() {
 			setTitle("csvScope");
 			setBounds(100, 100, 600, 800);
@@ -237,7 +290,7 @@ public class StreamPlotter {
 			text_port = new JTextField("2134");
 			text_port.setMaximumSize(new Dimension(100,20));
 			myPanel.add(text_port);
-			
+
 			label_scale = new JLabel("Scale:");
 			myPanel.add(label_scale);
 
@@ -252,7 +305,7 @@ public class StreamPlotter {
 			text_offset = new JTextField("0.0");
 			text_offset.setMaximumSize(new Dimension(100,20));
 			myPanel.add(text_offset);
-			
+
 			cnctBtn = new JButton("Connect");
 			ActionListener onCnctClick = new ActionListener() {
 				public void actionPerformed(ActionEvent evt) {
@@ -267,17 +320,17 @@ public class StreamPlotter {
 
 			label_all_val = new JLabel("***");
 			myPanel.add(label_all_val);
-			
+
 			JPanel allScopesPanel = new JPanel();
 			allScopesPanel.setLayout(new BoxLayout(allScopesPanel, BoxLayout.PAGE_AXIS));
-					
-			dscopePanel = new ScopePanelMinMax(10,20,40);
+
+			dscopePanel = new ScopePanelMinMax(10,-2,2);
 			allScopesPanel.add(dscopePanel);
-			
+
 			this.getContentPane().add(allScopesPanel, BorderLayout.CENTER);
 			this.getContentPane().add(new JPanel(), BorderLayout.WEST);
 			this.getContentPane().add(new JPanel(), BorderLayout.EAST);
-		
+
 			int delay = 100; // milliseconds
 			ActionListener taskPerformer = new ActionListener() {
 				public void actionPerformed(ActionEvent evt) {
@@ -289,7 +342,7 @@ public class StreamPlotter {
 					else
 						myString = "Connect";
 					cnctBtn.setText(myString);
-					
+
 					//For GUI Testing
 					//tankTemp = Math.random()*20+20;
 					//dscopeTempAllData[0] = refTemp;
@@ -297,18 +350,18 @@ public class StreamPlotter {
 					//dscopeTempAllData[2] = ref_rueckTemp;
 					//dscopeTempAllData[3] = rueckTemp;
 					//dscopeTempPanel.addData(dscopeTempAllData); 
-					
+
 					//Repaint Scopes
 					dscopePanel.repaint();
 				}
 			};
 			new Timer(delay, taskPerformer).start();
 		}
-		
+
 		public void addData(double data[]) {
 			dscopePanel.addData(data);
 		}
-		
+
 
 		public String getHost() {
 			return (text_host.getText());
@@ -317,7 +370,7 @@ public class StreamPlotter {
 		public String getPort() {
 			return (text_port.getText());
 		}
-		
+
 		public double getScale() {
 			return (java.lang.Double.parseDouble(text_scale.getText()));
 		}
@@ -325,12 +378,12 @@ public class StreamPlotter {
 		public double getOffset() {
 			return (java.lang.Double.parseDouble(text_offset.getText()));
 		}
-		
-		
+
+
 		public void setAllValText(String text) {
 			label_all_val.setText(text);
 		}
-		
+
 		public boolean isTerminated() {
 			return this.terminate;
 		}
@@ -375,7 +428,7 @@ public class StreamPlotter {
 		@Override
 		public void windowOpened(WindowEvent e) {
 		}
-		
+
 		private class ScopePanelMinMax extends JPanel{
 
 			private static final long serialVersionUID = -600524620234113234L;
