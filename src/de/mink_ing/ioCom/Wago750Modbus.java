@@ -108,7 +108,9 @@ public class Wago750Modbus {
 				wago750transInput.execute();
 				wago750resInput = (ReadInputDiscretesResponse) wago750transInput.getResponse();
 				
-				int num = wago750resInput.getBitCount();
+				//int num = wago750resInput.getBitCount();  //todo: does not work, why?;
+				int num = this.inputImage.length;
+				
 				for(int i = 0; i< num; i++) {
 					this.inputImage[i] = wago750resInput.getDiscreteStatus(i);
 				}
@@ -182,12 +184,12 @@ public class Wago750Modbus {
 	
 	
 	//Constructor
-	public Wago750Modbus() {
+	public Wago750Modbus(String host) {
 		commThread = new CommunicationThread();
 
 		InetAddress wago750addr;
 		try {
-			wago750addr = InetAddress.getByName("192.168.3.11");
+			wago750addr = InetAddress.getByName(host);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 			return;
@@ -202,8 +204,19 @@ public class Wago750Modbus {
 		wago750con.setTimeout(200);
 	}
 	
+	
+	//Constructor
+	public Wago750Modbus() {
+		this("192.168.3.11");
+	}
+	
 	public Wago750Modbus(Logger logger){
 		this();
+		this.logger = logger;
+	}
+	
+	public Wago750Modbus(String host, Logger logger){
+		this(host);
 		this.logger = logger;
 	}
 
