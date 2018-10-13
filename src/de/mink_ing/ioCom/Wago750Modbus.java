@@ -129,6 +129,12 @@ public class Wago750Modbus {
 				wago750con.close();
 				wago750connected = false;
 			}
+			catch (Exception ex){
+				//System.out.println("ModbusException while execute!\n");
+				logger.log(Level.WARNING, "Exception while execute", ex);
+				wago750con.close();
+				wago750connected = false;
+			}
 		}
 	}
 
