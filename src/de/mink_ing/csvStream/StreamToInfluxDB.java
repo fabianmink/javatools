@@ -31,6 +31,9 @@ public class StreamToInfluxDB {
 	private static boolean readTableHeaders = true;
 	private static boolean readScalings = false;
 	
+	private static boolean specifyRetentionPolicy = false;
+	private static String rpName = "one_week";
+	
 	//private static boolean readUnit = false;
 
 	private static Socket mySocket;
@@ -82,12 +85,17 @@ public class StreamToInfluxDB {
 
 	public static void main(String args[]) throws Exception {
 		//System.out.println("hello, world.");
-		
+		//e.g. call by
+		//StreamToInfluxDB 192.168.3.1 1234 true true testDb testdatapoint
+				
 		try {
 			host = args[0];
 			port = Integer.parseInt(args[1]);
 			readTableHeaders = Boolean.parseBoolean(args[2]);
 			readScalings = Boolean.parseBoolean(args[3]);
+			
+			databaseName = args[4];
+			databasePointName = args[5];
 		}
 		catch (Exception e) {
 			System.out.println("wrong / missing arguments. Using default");
@@ -220,14 +228,16 @@ public class StreamToInfluxDB {
 		//System.out.println("connect DB");
 		influxDB = InfluxDBFactory.connect(databaseURL);
 		influxDB.setDatabase(databaseName);
+		
+		BatchPoints.Builder thisBatchPointBuilder = BatchPoints.database(databaseName);
+		
+		if(specifyRetentionPolicy) {
+			thisBatchPointBuilder.retentionPolicy(rpName);
+		}
+		
+		BatchPoints batchPoints = thisBatchPointBuilder.build();
 
-		BatchPoints batchPoints = BatchPoints
-				.database("mydb")
-				//.tag("async", "true")
-				//.retentionPolicy(rpName)
-				//.consistency(ConsistencyLevel.ALL)
-				.build();
-
+		
 		//		for (int i = 0; i<headlines.length; i++) {
 		//			//System.out.println("to DB: " + headlines[i] + ": " + valueArray[i] + " ");
 		//			Point thispoint = Point.measurement(headlines[i])
