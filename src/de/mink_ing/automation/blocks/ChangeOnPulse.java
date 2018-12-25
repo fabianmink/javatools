@@ -25,7 +25,7 @@ public class ChangeOnPulse extends DynamicBlock{
 		}
 		else if(forceOn) { //Force on has prio over toggle
 			state = true; 
-			forceOff = false; //Reset force off (might be set again in next cycle)
+			forceOn = false; //Reset force off (might be set again in next cycle)
 		}
 		else if(in & !in_old) { //Toggle has lowest prio
 			state = !state;
