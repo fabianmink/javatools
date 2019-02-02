@@ -9,6 +9,7 @@ public class ChangeOnPulse extends DynamicBlock{
 	//internal states
 	private boolean state = false;
 	private boolean in_old;
+	private boolean state_change = true;
 	
 	//inputs
 	private boolean in;
@@ -17,7 +18,7 @@ public class ChangeOnPulse extends DynamicBlock{
 	
 	//updateStates
 	public void oneStep(){
-		
+		boolean state_old = state;
 		
 		if(forceOff) { //Force off has highest prio
 			state = false; 
@@ -31,6 +32,9 @@ public class ChangeOnPulse extends DynamicBlock{
 			state = !state;
 		}
 		in_old = in;
+		if(state_old != state) {
+			state_change = true;
+		}
 	}
 	
 	public void setInput(boolean in){
@@ -43,6 +47,12 @@ public class ChangeOnPulse extends DynamicBlock{
 	
 	public void forceOff(boolean in){
 		this.forceOff = in;
+	}
+	
+	public boolean isStateChanged(){
+		boolean sc = state_change;
+		state_change = false;
+		return(sc);
 	}
 	
 	public boolean getOutput(){
