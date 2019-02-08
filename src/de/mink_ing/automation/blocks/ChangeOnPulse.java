@@ -51,7 +51,9 @@ public class ChangeOnPulse extends DynamicBlock{
 	
 	public boolean isStateChanged(){
 		boolean sc = state_change;
-		state_change = false;
+		if(state_change) {
+			state_change = false;
+		}
 		return(sc);
 	}
 	
