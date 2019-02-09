@@ -1,6 +1,6 @@
 package de.mink_ing.automation.blocks;
 
-public class ChangeOnPulse extends DynamicBlock implements ITextualStateBlock{
+public class ChangeOnPulse extends DynamicBlock implements ITextualStateAndCmdBlock {
 	
 	public ChangeOnPulse(int Ts) {
 		super(Ts);
@@ -41,13 +41,20 @@ public class ChangeOnPulse extends DynamicBlock implements ITextualStateBlock{
 		this.in = in;
 	}
 	
-	public void forceOn(boolean in){
-		this.forceOn = in;
+	public void forceOn() {
+		this.forceOn = true;
 	}
 	
-	public void forceOff(boolean in){
-		this.forceOff = in;
+	public void forceOff() {
+		this.forceOff = true;
 	}
+	//public void forceOn(boolean in){
+	//	this.forceOn = in;
+	//}
+	
+	//public void forceOff(boolean in){
+	//	this.forceOff = in;
+	//}
 	
 	public boolean isStateChanged(){
 		boolean sc = state_change;
@@ -67,6 +74,17 @@ public class ChangeOnPulse extends DynamicBlock implements ITextualStateBlock{
 		}
 		else {
 			return("OFF");
+		}
+	}
+
+	public void cmdAsString(String cmd) {
+		//System.out.println("check: " + cmd);
+		if(cmd.equalsIgnoreCase("ON")){
+			this.forceOn = true;
+			//System.out.println("F. ON");
+		}
+		if(cmd.equalsIgnoreCase("OFF")){
+			this.forceOff = true;
 		}
 	}
 }
