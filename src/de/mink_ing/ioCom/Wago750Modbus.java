@@ -152,16 +152,9 @@ public class Wago750Modbus {
 				wago750transCoil.execute();
 				wago750resCoil = (WriteMultipleCoilsResponse) wago750transCoil.getResponse();
 			}
-			catch (ModbusIOException ex){
-				//System.out.println("ModbusIOException while execute!\n");
-				logger.log(Level.WARNING, "ModbusIOException while execute", ex);
-				//ex.printStackTrace();
-				wago750con.close();
-				wago750connected = false;
-			}
-			catch (ModbusException ex){
-				//System.out.println("ModbusException while execute!\n");
-				logger.log(Level.WARNING, "ModbusException while execute", ex);
+			catch (Exception ex){
+				//System.out.println("Exception while execute!\n");
+				logger.log(Level.WARNING, "Exception while execute", ex);
 				wago750con.close();
 				wago750connected = false;
 			}
