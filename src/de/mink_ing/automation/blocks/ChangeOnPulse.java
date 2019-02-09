@@ -1,6 +1,6 @@
 package de.mink_ing.automation.blocks;
 
-public class ChangeOnPulse extends DynamicBlock{
+public class ChangeOnPulse extends DynamicBlock implements ITextualStateBlock{
 	
 	public ChangeOnPulse(int Ts) {
 		super(Ts);
@@ -59,6 +59,15 @@ public class ChangeOnPulse extends DynamicBlock{
 	
 	public boolean getOutput(){
 		return( state );
+	}
+
+	public String getStateAsString() {
+		if(getOutput()) {
+			return("ON");
+		}
+		else {
+			return("OFF");
+		}
 	}
 }
 

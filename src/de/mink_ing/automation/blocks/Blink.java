@@ -1,6 +1,6 @@
 package de.mink_ing.automation.blocks;
 
-public class Blink extends DynamicBlock {
+public class Blink extends DynamicBlock implements ITextualStateBlock {
 			
 	public Blink(int Ts) {
 		super(Ts);
@@ -44,5 +44,13 @@ public class Blink extends DynamicBlock {
 	
 	public boolean getOutput(){
 		return(state_on);
+	}
+
+	public String getStateAsString() {
+		return("");
+	}
+
+	public boolean isStateChanged() {
+		return false;
 	}
 }

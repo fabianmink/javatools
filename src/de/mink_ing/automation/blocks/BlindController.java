@@ -1,6 +1,6 @@
 package de.mink_ing.automation.blocks;
 
-public class BlindController extends DynamicBlock {
+public class BlindController extends DynamicBlock implements ITextualStateBlock {
 
 	public BlindController(int Ts) {
 		super(Ts);
@@ -137,6 +137,15 @@ public class BlindController extends DynamicBlock {
 
 	public boolean getOutputRun(){
 		return(run);
+	}
+
+
+	public String getStateAsString() {
+		return("");
+	}
+
+	public boolean isStateChanged() {
+		return false;
 	}
 
 
