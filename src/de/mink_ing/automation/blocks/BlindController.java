@@ -33,7 +33,7 @@ public class BlindController extends DynamicBlock implements ITextualStateBlock 
 
 	private boolean up;
 	private boolean dn;
-	private boolean updn;
+	private boolean updn; //true = down, false = up
 	private boolean run;
 
 
@@ -63,6 +63,26 @@ public class BlindController extends DynamicBlock implements ITextualStateBlock 
 				lock_dn = lockTime;
 			}
 			
+			if(updn == false) {
+				if(lock_run == 0) {
+					run = true;
+					lock_updn = lockTime; //lock up/dn while running
+				}
+			}
+			else {
+				if(lock_updn == 0) {
+					updn = false;
+					lock_run = lockTime; //lock run after updn switching
+				}
+			}
+		}
+
+		if(in_dn && !in_up) { //Down request
+			if(lock_dn == 0) {
+				dn = true;
+				lock_up = lockTime;
+			}
+			
 			if(updn == true) {
 				updn_tail = updnTailTime;
 				if(lock_run == 0) {
@@ -74,28 +94,6 @@ public class BlindController extends DynamicBlock implements ITextualStateBlock 
 				if(lock_updn == 0) {
 					updn = true;
 					updn_tail = updnTailTime;
-					lock_run = lockTime; //lock run after updn switching
-				}
-			}
-			
-		}
-
-		if(in_dn && !in_up) { //Down request
-			if(lock_dn == 0) {
-				dn = true;
-				lock_up = lockTime;
-			}
-			
-			
-			if(updn == false) {
-				if(lock_run == 0) {
-					run = true;
-					lock_updn = lockTime; //lock up/dn while running
-				}
-			}
-			else {
-				if(lock_updn == 0) {
-					updn = false;
 					lock_run = lockTime; //lock run after updn switching
 				}
 			}
@@ -129,8 +127,8 @@ public class BlindController extends DynamicBlock implements ITextualStateBlock 
 		return(dn);
 	}
 
-	//true = up
-	//false = down
+	//true = down
+	//false = up
 	public boolean getOutputUpdown(){
 		return(updn);
 	}
