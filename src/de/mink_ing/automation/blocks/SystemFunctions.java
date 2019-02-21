@@ -93,7 +93,7 @@ public class SystemFunctions extends Block implements ITextualCmdBlock{
 	
 	public void cmdAsString(String cmd) {
 		//System.out.println("check: " + cmd);
-		if(cmd.equalsIgnoreCase("SHUTDOWN")){
+		if(cmd.equalsIgnoreCase("SHUTDOWN") || cmd.equalsIgnoreCase("HALT") ){
 			this.doSd = true;
 			System.out.println("shutdown initiating");
 		}
