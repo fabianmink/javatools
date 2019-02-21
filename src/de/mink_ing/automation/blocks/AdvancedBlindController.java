@@ -2,7 +2,7 @@ package de.mink_ing.automation.blocks;
 
 
 //todo: Not working. Improve!!
-public class AdvancedBlindController extends BlindController {
+public class AdvancedBlindController extends BlindController implements ITextualCmdBlock {
 	
 	private enum states{
 		state_off,
@@ -28,6 +28,10 @@ public class AdvancedBlindController extends BlindController {
 	private boolean rem_up;
 	private boolean rem_dn;
 	
+	private boolean force_up = false;
+	private boolean force_dn = false;
+	private boolean force_st = false;
+	
 	
 	public AdvancedBlindController(int Ts) {
 		super(Ts);
@@ -45,12 +49,37 @@ public class AdvancedBlindController extends BlindController {
 		this.in_dn = in;
 	}
 	
+	public void forceUp() {
+		force_up = true;
+	}
+	
+	public void forceDown() {
+		force_dn = true;
+	}
+	
+	public void forceStop() {
+		force_st = true;
+	}
+	
 	public void oneStep(){
 
 		switch(myState) {
 		case state_off:
 			rem_dn = false;
 			rem_up = false;
+			if(force_st) {
+				force_st = false;
+			}
+			if(force_dn) {
+				force_dn = false;
+				timer = runTime;
+				myState = states.state_runDown;
+			}
+			if(force_up) {
+				force_up = false;
+				timer = runTime;
+				myState = states.state_runUp;
+			}
 			if(in_dn) {
 				timer = jogTime;
 				myState = states.state_jogDown;
@@ -63,6 +92,7 @@ public class AdvancedBlindController extends BlindController {
 		
 		case state_jogDown:
 			rem_dn = true;
+			rem_up = false;
 			if(timer > 0) {
 				timer--;
 				if(!in_dn) {
@@ -78,6 +108,7 @@ public class AdvancedBlindController extends BlindController {
 			break;
 		
 		case state_jogUp:
+			rem_dn = false;
 			rem_up = true;
 			if(timer > 0) {
 				timer--;
@@ -94,6 +125,8 @@ public class AdvancedBlindController extends BlindController {
 			break;
 			
 		case state_runDown:
+			rem_dn = true;
+			rem_up = false;
 			if(timer > 0) {
 				timer--;
 				if(in_up || in_dn) {
@@ -104,9 +137,15 @@ public class AdvancedBlindController extends BlindController {
 			else {
 				myState = states.state_off;
 			}
+			if(force_st || force_dn || force_up) {
+				//go to off, but keep force cmd.
+				myState = states.state_off;
+			}
 			break;
 			
 		case state_runUp:
+			rem_dn = false;
+			rem_up = true;
 			if(timer > 0) {
 				timer--;
 				if(in_up || in_dn) {
@@ -115,6 +154,10 @@ public class AdvancedBlindController extends BlindController {
 				}
 			}
 			else {
+				myState = states.state_off;
+			}
+			if((force_st || force_dn || force_up) == true) {
+				//go to off, but keep force cmd.
 				myState = states.state_off;
 			}
 			break;
@@ -128,8 +171,6 @@ public class AdvancedBlindController extends BlindController {
 			else {
 				myState = states.state_off;
 			}
-		
-
 		}
 
 		
@@ -140,5 +181,17 @@ public class AdvancedBlindController extends BlindController {
 		
 	}
 	
+	public void cmdAsString(String cmd) {
+		System.out.println("check: " + cmd);
+		if(cmd.equalsIgnoreCase("STOP")){
+			this.force_st = true;
+		}
+		if(cmd.equalsIgnoreCase("DOWN")){
+			this.force_dn = true;
+		}
+		if(cmd.equalsIgnoreCase("UP")){
+			this.force_up = true;
+		}
+	}
 
 }
