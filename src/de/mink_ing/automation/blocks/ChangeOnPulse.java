@@ -70,20 +70,22 @@ public class ChangeOnPulse extends DynamicBlock implements ITextualStateAndCmdBl
 
 	public String getStateAsString() {
 		if(getOutput()) {
-			return("ON");
+			//return("ON");
+			return("1");
 		}
 		else {
-			return("OFF");
+			//return("OFF");
+			return("0");
 		}
 	}
 
 	public void cmdAsString(String cmd) {
 		//System.out.println("check: " + cmd);
-		if(cmd.equalsIgnoreCase("ON")){
+		if(cmd.equalsIgnoreCase("ON") || cmd.equals("1") ){
 			this.forceOn = true;
 			//System.out.println("F. ON");
 		}
-		if(cmd.equalsIgnoreCase("OFF")){
+		if(cmd.equalsIgnoreCase("OFF") || cmd.equals("0")){
 			this.forceOff = true;
 		}
 	}
