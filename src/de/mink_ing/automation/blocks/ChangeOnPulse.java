@@ -9,7 +9,7 @@ public class ChangeOnPulse extends DynamicBlock implements ITextualStateAndCmdBl
 	//internal states
 	private boolean state = false;
 	private boolean in_old;
-	private boolean state_change = true;
+	private boolean state_change = true; //always report state change for first run
 	
 	//inputs
 	private boolean in;
