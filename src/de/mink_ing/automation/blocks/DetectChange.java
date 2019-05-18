@@ -42,6 +42,15 @@ public class DetectChange extends DynamicBlock implements ITextualStateBlock{
 			return("0");
 		}
 	}
+	
+//	public String getStateAsString() {
+//		if(this.in) {
+//			return("CLOSED");
+//		}
+//		else {
+//			return("OPEN");
+//		}
+//	}
 
 	public boolean isStateChanged() {
 		boolean sc = state_change;
