@@ -1,6 +1,6 @@
 package de.mink_ing.automation.blocks;
 
-public class Hold extends DynamicBlockLog{
+public class Hold extends DynamicBlockLog implements ITextualStateAndCmdBlock{
 	
 	public Hold(int Ts) {
 		super(Ts);
@@ -13,9 +13,12 @@ public class Hold extends DynamicBlockLog{
 	private int state_cnt = 0;
 	private boolean state_out = false;
 	
+	private boolean state_change = true; //always report state change for first run
+	
 	//inputs
 	private boolean in = false;
 	private boolean forceOff = false;
+	private boolean forceOn = false;
 	
 	public void setHoldTime(int holdTime){
 		this.hold_normalized = holdTime/Ts;
@@ -24,7 +27,10 @@ public class Hold extends DynamicBlockLog{
 	//updateStates
 	public void oneStep(){
 		
-		if(in){
+		boolean state_old = state_out;
+		
+		if(in || forceOn){
+			forceOn = false;
 			if(state_cnt == 0){
 				if(logger != null) logger.fine(name + ": On");
 			}
@@ -32,7 +38,6 @@ public class Hold extends DynamicBlockLog{
 		}
 		
 		//Perform update of internal states
-		state_out = false;
 		if(state_cnt > 0){
 			state_cnt--;
 			state_out = true;
@@ -40,9 +45,13 @@ public class Hold extends DynamicBlockLog{
 				if(logger != null) logger.fine(name + ": Regular off");
 			}
 		}
+		else {
+			state_out = false;
+		}
 		
 		
 		if(forceOff){
+			forceOff = false;
 			if(state_cnt > 0){
 				if(logger != null) logger.fine(name + ": Forced off");
 			}
@@ -50,6 +59,9 @@ public class Hold extends DynamicBlockLog{
 			state_out = false;
 		}
 		
+		if(state_old != state_out) {
+			state_change = true;
+		}
 	}
 	
 	public void setInput(boolean in){
@@ -62,6 +74,36 @@ public class Hold extends DynamicBlockLog{
 	
 	public boolean getOutput(){
 		return(state_out);
+	}
+	
+	public boolean isStateChanged(){
+		boolean sc = state_change;
+		if(state_change) {
+			state_change = false;
+		}
+		return(sc);
+	}
+	
+	public String getStateAsString() {
+		if(getOutput()) {
+			//return("ON");
+			return("1");
+		}
+		else {
+			//return("OFF");
+			return("0");
+		}
+	}
+
+	public void cmdAsString(String cmd) {
+		//System.out.println("check: " + cmd);
+		if(cmd.equalsIgnoreCase("ON") || cmd.equals("1") ){
+			this.forceOn = true;
+			//System.out.println("F. ON");
+		}
+		if(cmd.equalsIgnoreCase("OFF") || cmd.equals("0")){
+			this.forceOff = true;
+		}
 	}
 }
 
