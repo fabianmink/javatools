@@ -1,6 +1,6 @@
 package de.mink_ing.automation.blocks;
 
-public class BlindController extends DynamicBlock implements ITextualStateBlock {
+public class BlindController extends DynamicBlock implements ITextualStateAndCmdBlock {
 
 	public BlindController(int Ts) {
 		super(Ts);
@@ -144,6 +144,9 @@ public class BlindController extends DynamicBlock implements ITextualStateBlock 
 
 	public boolean isStateChanged() {
 		return false;
+	}
+	
+	public void cmdAsString(String cmd) {
 	}
 
 

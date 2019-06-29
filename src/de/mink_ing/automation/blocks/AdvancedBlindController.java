@@ -2,7 +2,7 @@ package de.mink_ing.automation.blocks;
 
 
 //todo: Not working. Improve!!
-public class AdvancedBlindController extends BlindController implements ITextualCmdBlock {
+public class AdvancedBlindController extends BlindController {
 	
 	private enum states{
 		state_off,
