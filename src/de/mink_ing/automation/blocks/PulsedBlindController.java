@@ -1,7 +1,6 @@
 package de.mink_ing.automation.blocks;
 
 
-//todo: Not working. Improve!!
 public class PulsedBlindController extends BlindController implements ITextualCmdBlock {
 	
 	private enum states{
@@ -108,7 +107,7 @@ public class PulsedBlindController extends BlindController implements ITextualCm
 				//TODO: set pulsewidth / toggle interval
 				if(out_dn) {
 					out_dn = false;
-					tg_cnt = 4;
+					tg_cnt = 3;
 				}
 				else {
 					if (tg_cnt > 0){
@@ -143,7 +142,7 @@ public class PulsedBlindController extends BlindController implements ITextualCm
 				out_dn = false;
 				if(out_up) {
 					out_up = false;
-					tg_cnt = 4;
+					tg_cnt = 3;
 				}
 				else {
 					if (tg_cnt > 0){
