@@ -1,12 +1,12 @@
 package de.mink_ing.automation.blocks;
 
-public class PushDetector extends DynamicBlock {
+public class PushDetectorAdvanced extends DynamicBlock { //todo: Extend Push detector??
 
 	//Parameters
 	private int tPush = 5;
 
 
-	public PushDetector(int Ts) {
+	public PushDetectorAdvanced(int Ts) {
 		super(Ts);
 	}
 

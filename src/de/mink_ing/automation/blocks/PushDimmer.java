@@ -2,11 +2,11 @@ package de.mink_ing.automation.blocks;
 
 public class PushDimmer extends DynamicBlock {
 	
-	protected PushDetector pd;
+	protected PushDetectorAdvanced pd;
 	
 	public PushDimmer(int Ts) {
 		super(Ts);
-		pd = new PushDetector(this.Ts);
+		pd = new PushDetectorAdvanced(this.Ts);
 	}
 
 	//Ts is not really necessary
