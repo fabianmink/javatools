@@ -49,6 +49,7 @@ public class StreamSimulator {
 //			buffer[3] = 10;
 			short angle = 0;
 			float freq = 0.001f;
+			short incr = 0;
 			
 			
 			while(true){
@@ -58,12 +59,17 @@ public class StreamSimulator {
 					angle +=  (short)(freq * 65536.0f);
 					float anglef = (float) (2.0f*Math.PI * angle/65536.0f);
 					float x = (float) (2.0f * Math.cos(anglef));
+					
+					incr++;
 
 
 					for (int i = 0; i< 3; i++) {
 						double rnd = (Math.random()-0.5);//*65535;
 						if(i == 1) {
 							rnd = 0.5*rnd + x;
+						}
+						if(i == 2) {
+							rnd = 0.1*rnd + ((double)incr)/65536.0 * 20.0;
 						}
 
 						outstring = outstring + String.format(Locale.ROOT, "%+06.2f", rnd);
