@@ -474,6 +474,7 @@ public class StreamPlotterT {
 
 						System.out.printf("Val change!: " + valmin + " " + valmax);
 						procTempScope.setMinMax(valmin, valmax);
+						//procTempScope.doAutoScale(); //TODO: Button for autoscaling!!
 					}
 				};
 

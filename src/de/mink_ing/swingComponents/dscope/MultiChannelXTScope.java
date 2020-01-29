@@ -49,7 +49,7 @@ public class MultiChannelXTScope extends JPanel {
 	//Trace Properties
 	protected double scale = 1.0;
 	protected double offset = 0.0;
-
+	
 
 	private void initStyles() {
 		Color colortbl[] = {Color.BLACK, Color.BLUE, Color.RED, Color.GREEN, Color.CYAN, Color.MAGENTA, Color.ORANGE, Color.PINK};
@@ -71,22 +71,72 @@ public class MultiChannelXTScope extends JPanel {
 		this.lineStyles = new LineStyle[noOfChannels];
 		initStyles();
 	}
+	
+	public void doAutoScale() {
+		 double max = this.getMaxValue();
+		 double min = this.getMinValue();
+		 double delta = max-min;
+		 double potenz = java.lang.Math.log10(delta*1.1); //10% Reserve
+		 double pfloor = java.lang.Math.floor(potenz);
+		 double scale = java.lang.Math.pow(10, pfloor);
+		 double pdelta = potenz-pfloor;
+		 if(pdelta < 0.3) {
+			 scale *= 2;
+		 }
+		 else if(pdelta < 0.7) {
+			 scale *= 5;
+		 }
+		 else {
+			 scale *= 10;
+		 }
+		 
+		 
+		 double avg = 0.5*(max+min);
+		 
+		 double offs = java.lang.Math.round(avg*10.0/scale)*0.2;
+		 
+		 this.setScale(2.0/scale);
+		 this.setOffset(-offs);
+		 
+		 System.out.println("delta: " + delta + "scale: " + scale + " offs: " + offs);
+	}
 
 	public void addData(int channel, double data, long timestamp) {
 		dataTrace[channel].addData(data, timestamp);
 	}
 
 	public double getMaxValue() {
-		//TODO: Calc max over all Channels!
-		//for(int i = 0; i< this.noOfChannels; i++) {
-		//	return(dataTrace[i].getBufferMax());
-		//}
-		return(0.0);
+		double max;
+		max = Double.NaN;
+		for(int i = 0; i<this.noOfChannels; i++){
+			double val = dataTrace[i].getBufferMax();
+			if( !java.lang.Double.isNaN(val) ){
+				if(java.lang.Double.isNaN(max)) {
+					max = val;
+				}
+				else { 
+					if(val>max) max = val;
+				}
+			}
+		}
+		return(max);
 	}
 
 	public double getMinValue() {
-		//TODO: Calc min over all Channels!
-		return(0.0);
+		double min;
+		min = Double.NaN;
+		for(int i = 0; i<this.noOfChannels; i++){
+			double val = dataTrace[i].getBufferMin();
+			if( !java.lang.Double.isNaN(val) ){
+				if(java.lang.Double.isNaN(min)) {
+					min = val;
+				}
+				else { 
+					if(val<min) min = val;
+				}
+			}
+		}
+		return(min);
 	}
 
 
@@ -98,6 +148,14 @@ public class MultiChannelXTScope extends JPanel {
 		this.offset = offset;
 	}
 
+	public double getScale() {
+		return(this.scale);
+	}
+
+	public double getOffset() {
+		return(this.offset);
+	}
+	
 	public void setMinMax(double min, double max) {
 		double delta = max-min;
 		double avg = (max+min)/2.0;
@@ -105,6 +163,17 @@ public class MultiChannelXTScope extends JPanel {
 		this.setScale(2.0/delta); //Scope goes from -1.0...1.0
 		this.setOffset(-2.0*avg/delta);
 	}
+	
+	public double getMin() {
+		//TODO
+		return(0.0);
+	}
+	
+	public double getMax() {
+		//TODO
+		return(0.0);
+	}
+
 
 	protected void paintComponent(Graphics g) {
 
@@ -368,11 +437,16 @@ public class MultiChannelXTScope extends JPanel {
 		public double getBufferMin(){
 			double min;
 			double val;
-			min = databuffer[0];
+			min = Double.NaN;
 			for(int i = 0; i<datalen; i++){
 				val = databuffer[i];
 				if( !java.lang.Double.isNaN(val) ){
-					if(val<min) min = val;
+					if(java.lang.Double.isNaN(min)) {
+						min = val;
+					}
+					else {
+						if(val<min) min = val;
+					}
 				}
 			}
 			return(min);
@@ -381,11 +455,16 @@ public class MultiChannelXTScope extends JPanel {
 		public double getBufferMax(){
 			double max;
 			double val;
-			max = databuffer[0];
+			max = Double.NaN;
 			for(int i = 0; i<datalen; i++){
 				val = databuffer[i];
 				if( !java.lang.Double.isNaN(val) ){
-					if(val>max) max = val;
+					if(java.lang.Double.isNaN(max)) {
+						max = val;
+					}
+					else {
+						if(val>max) max = val;
+					}
 				}
 			}
 			return(max);
