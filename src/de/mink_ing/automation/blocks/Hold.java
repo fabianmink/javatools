@@ -105,5 +105,9 @@ public class Hold extends DynamicBlockLog implements ITextualStateAndCmdBlock{
 			this.forceOff = true;
 		}
 	}
+	
+	public String getTopicExtensionAsString() {
+		return null;
+	}
 }
 

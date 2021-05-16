@@ -55,5 +55,9 @@ public class StateInteger extends DynamicBlock implements ITextualStateAndCmdBlo
 		
 		this.setInput(cmdi);
 	}
+	
+	public String getTopicExtensionAsString() {
+		return null;
+	}
 }
 

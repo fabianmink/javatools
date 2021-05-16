@@ -53,4 +53,8 @@ public class Blink extends DynamicBlock implements ITextualStateBlock {
 	public boolean isStateChanged() {
 		return false;
 	}
+	
+	public String getTopicExtensionAsString() {
+		return null;
+	}
 }

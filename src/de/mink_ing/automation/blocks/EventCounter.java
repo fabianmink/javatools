@@ -53,5 +53,9 @@ public class EventCounter extends DynamicBlock implements ITextualStateBlock {
 	public String getStateAsString() {
 		return(String.valueOf(getCount()));
 	}
+	
+	public String getTopicExtensionAsString() {
+		return null;
+	}
 }
 

@@ -89,5 +89,9 @@ public class ChangeOnPulse extends DynamicBlock implements ITextualStateAndCmdBl
 			this.forceOff = true;
 		}
 	}
+	
+	public String getTopicExtensionAsString() {
+		return null;
+	}
 }
 

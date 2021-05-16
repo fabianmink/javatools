@@ -59,5 +59,9 @@ public class DetectChange extends DynamicBlock implements ITextualStateBlock{
 		}
 		return(sc);
 	}
+	
+	public String getTopicExtensionAsString() {
+		return null;
+	}
 }
 

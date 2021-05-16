@@ -149,5 +149,7 @@ public class BlindController extends DynamicBlock implements ITextualStateAndCmd
 	public void cmdAsString(String cmd) {
 	}
 
-
+	public String getTopicExtensionAsString() {
+		return null;
+	}
 }
