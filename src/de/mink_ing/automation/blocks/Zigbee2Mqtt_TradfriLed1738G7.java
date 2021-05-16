@@ -11,15 +11,24 @@ public class Zigbee2Mqtt_TradfriLed1738G7 extends DynamicBlock implements ITextu
 	private boolean state_change = true; //always report state change for first run
 	
 	private boolean in;
+	
+	private int cnt = 0;
+	private static final int cntPubChange = 10000; //publish a dummy change all 10000 calls
 
 	public Zigbee2Mqtt_TradfriLed1738G7(int Ts) {
 		super(Ts);
 	}
 
 	public void oneStep(){
+		cnt++;
 		if(in != state) {
 			state = in;
 			state_change = true;
+			cnt = 0;
+		}
+		if(cnt >= cntPubChange) {
+			state_change = true;
+			cnt = 0;
 		}
 	}
 	
